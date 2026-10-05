@@ -1,0 +1,16 @@
+[Unit]
+Description=Claude Code Process Watcher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/claude-thought-bridge
+Environment=BRIDGE_ENV_FILE=/opt/claude-thought-bridge/.env
+ExecStart=/opt/claude-thought-bridge/.venv/bin/thought-bridge-watcher
+Restart=on-failure
+RestartSec=3
+User=thoughtbridge
+
+[Install]
+WantedBy=default.target

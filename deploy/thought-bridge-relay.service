@@ -1,0 +1,22 @@
+[Unit]
+Description=Claude Thought Bridge Relay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/claude-thought-bridge
+Environment=BRIDGE_ENV_FILE=/opt/claude-thought-bridge/.env
+ExecStart=/opt/claude-thought-bridge/.venv/bin/thought-bridge-relay
+Restart=on-failure
+RestartSec=3
+User=thoughtbridge
+Group=thoughtbridge
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/thought-bridge /opt/claude-thought-bridge/state
+
+[Install]
+WantedBy=multi-user.target
