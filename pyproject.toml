@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "claude-thought-bridge"
+version = "0.1.1"
+description = "Bridge Claude Code process events and replies to a small self-hosted home page or Telegram."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Community template"}]
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "mcp>=1.0,<2",
+  "pywebpush>=2.0,<3",
+  "cryptography>=42,<46",
+]
+
+[project.scripts]
+thought-bridge = "thought_bridge.cli:main"
+thought-bridge-watcher = "thought_bridge.watcher:main"
+thought-bridge-relay = "thought_bridge.server:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+thought_bridge = ["web/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

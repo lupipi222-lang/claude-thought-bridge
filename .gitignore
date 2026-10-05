@@ -1,0 +1,34 @@
+# Local production files that pre-date this public kit. They may contain
+# machine-specific paths or credentials and must never enter the repository.
+/send_thinking.py
+/stream_watcher.py
+/stream_watcher.py.bak_*
+/thinking_translate.py
+/thinking_watcher.py
+/__pycache__/
+/.stream_watcher_state.json
+/*.log
+
+# Runtime state and secrets
+.env
+*.db
+*.sqlite3
+*.log
+*.pid
+*.bak
+*.bak_*
+state/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
