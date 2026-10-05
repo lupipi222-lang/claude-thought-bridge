@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#eef4ff">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/styles.css">
+  <title>过程桥接器</title>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <small>Claude Code bridge</small>
+        <h1>消息</h1>
+      </div>
+      <button id="pushButton" type="button">开启通知</button>
+    </header>
+    <section id="messageList" class="message-list" aria-live="polite">
+      <p class="empty">正在连接…</p>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

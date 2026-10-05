@@ -1,0 +1,9 @@
+{
+  "name": "Claude Code Process Bridge",
+  "short_name": "CC Bridge",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eaf1ff",
+  "theme_color": "#eef4ff",
+  "icons": []
+}
