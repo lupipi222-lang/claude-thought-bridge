@@ -14,10 +14,15 @@ class StyleTemplateTests(unittest.TestCase):
             "只呈现实际发生过的自己，不替反应补出一个更完整的理由",
             "心里话不能替代行动",
             "心里话里的情绪要抵达实际表达",
+            "## [程序封装协议]",
+            "[[自我状态]]",
+            "[[/自我状态]]",
+            "mcp__thought-bridge__reply",
         ):
             self.assertIn(phrase, source)
         self.assertEqual(source.count("user"), 10)
         self.assertNotIn("小芦", source)
+        self.assertNotIn("`CLAUDE.md`", source)
 
 
 if __name__ == "__main__":
