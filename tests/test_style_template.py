@@ -9,7 +9,7 @@ class StyleTemplateTests(unittest.TestCase):
     def test_public_self_description_uses_generic_user_label(self):
         source = (ROOT / "templates" / "看清自己.md").read_text(encoding="utf-8")
         for phrase in (
-            "description: 迟砚用简体中文写给user看的第一人称公开心声",
+            "description: 用简体中文写给user看的第一人称公开心声",
             "## 写给user的心里话",
             "只呈现实际发生过的自己，不替反应补出一个更完整的理由",
             "心里话不能替代行动",
@@ -22,6 +22,7 @@ class StyleTemplateTests(unittest.TestCase):
             self.assertIn(phrase, source)
         self.assertEqual(source.count("user"), 10)
         self.assertNotIn("小芦", source)
+        self.assertNotIn("迟砚", source)
         self.assertNotIn("`CLAUDE.md`", source)
 
 
