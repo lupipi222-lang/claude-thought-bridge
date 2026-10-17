@@ -13,6 +13,21 @@
 
 临时调试可以设置 `AUTO_REPLY_FROM_TRANSCRIPT=true`，但可能与 MCP 路径重复，生产不建议打开。
 
+## 出现 `reasoning_extraction` 或开窗后第一条就被拒绝
+
+先查看该轮 transcript。如果同时出现 `stop_reason: refusal` 和 `stop_details.category: reasoning_extraction`，这是该轮候选输出触发了“推理提取”分类；不能据此判断是 NSFW、思考等级或账号被永久标记。
+
+按下面顺序排查：
+
+1. 新开一个干净窗口，不要在同一窗口反复重试相同结构；
+2. 暂时关闭心里话封装做一次 A/B 测试，记录开启与关闭时的 `stop_reason`；
+3. 检查开窗时最终拼接的全部 system prompt、output style、`CLAUDE.md` 和 runtime prompt，不要只检查其中一个文件；
+4. 如果使用自建前端且不需要 `reply`，删除额外拼入的 `reply` 封装协议，但保留原本已经验证可用的心里话模板；
+5. `thinking` 和行动轨迹由 watcher 从 transcript 外部读取。不要在提示词里要求模型主动“输出、还原、解释或推送原生思考链”；
+6. 不要靠切换中／高／x高思考等级解决结构问题。
+
+完整上下文也会影响分类结果。一次 A/B 只能定位可疑层，不能证明某个账号被标记，也不能保证任何提示在所有上下文中都不会被拒绝。
+
 ## 正式回复重复
 
 - 关闭 `AUTO_REPLY_FROM_TRANSCRIPT`；

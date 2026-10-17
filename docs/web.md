@@ -53,6 +53,13 @@ powershell -ExecutionPolicy Bypass -File .\deploy\install-windows.ps1 -InstallWa
 
 ## 3. 安装“看清自己”风格
 
+先确认你使用哪一种发送方式：
+
+- **使用本仓库网页和 `mcp__thought-bridge__reply`**：按本节安装完整模板；
+- **使用自建前端，正式回复会被前端自动显示，不使用 `reply` 工具**：不要直接照搬模板末尾的 `## [程序封装协议]`，保留自己已经验证可用的心里话模板即可。终端的 `thinking` 与工具动作应由 watcher 从 transcript 外部读取，不要再在 system prompt、output style 或 `CLAUDE.md` 中要求模型“输出／还原／推送原生思考链”。
+
+这两条路线二选一。不要一边让自建前端自动接收回复，一边再要求模型使用本仓库的 `reply` 封装，否则会形成重复发送或额外的两段式输出约束。
+
 Claude Code 用户 output style 的位置：
 
 ```text
@@ -75,6 +82,8 @@ Copy-Item .\templates\看清自己.md "$env:USERPROFILE\.claude\output-styles\�
 ```
 
 模板已经要求成品回复遵守 `[[自我状态]]...[[/自我状态]]` 协议，并通过 `reply` 工具发送。如果要改心里话规则，可以替换 `## 写给user的心里话` 部分，但应保留末尾的 `## [程序封装协议]`。
+
+上面这段只适用于本仓库的完整 `reply` 路线。自建前端路线不需要注册下一节的 MCP，也不需要把这段封装协议再次拼进自己的 system prompt。
 
 ## 4. 注册正式回复 MCP
 
