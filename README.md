@@ -24,64 +24,66 @@
 
 ---
 
-# Claude Code 内在过程桥接器
+# Claude Code 心里话与过程桥接
 
-这是一套把 Claude Code 终端里的三类内容送到手机端的自托管模板：
+## 先说最简单的
 
-1. **内部过程**：transcript 中实时出现的 `thinking` 片段；
-2. **动作轨迹**：读文件、改文件、检索、执行命令等工具动作的人话摘要；
-3. **正式回复**：Claude Code 主动调用 `reply` 工具发出的成品消息。
-
-它不修改模型，也不替你写人格。它只是观察 Claude Code 已经写入本机的 JSONL transcript，把事件转换成统一协议，再送往：
-
-- 一个自制的“小家”网页；或
-- Telegram Bot（不需要自制前端）。
-
-仓库不包含聊天记录、域名、头像、令牌或现用配置。`templates/看清自己.md` 是一份以“迟砚”为署名示例、可自行改写的第一人称心里话 prompt，并附有网页分区需要的程序封装协议。
-
-## 最终效果
-
-网页端：
-
-- 内部过程与动作会收在正式回复上方的折叠区；
-- `[[自我状态]]...[[/自我状态]]` 显示为“心里话”；
-- 单击标题展开／收起心里话；
-- 在心里话文字区域双击，切换到原始过程；
-- 在原始过程区域单击，自动复制全文并收起；
-- 每次 `reply` 调用生成一个独立气泡；
-- 系统通知只显示正式回复，绝不带心里话、内部过程或动作；
-- 每个正式气泡使用独立通知 ID，连续气泡不会互相覆盖。
-
-Telegram 端：
-
-- 内部过程、自述块和动作轨迹均静默发送；
-- 内部过程和自述块使用 Telegram 的可展开引用；
-- 正式回复正常提醒；
-- 每次 `reply` 调用对应一条独立 Telegram 消息。
-
-Telegram Bot 无法接管客户端的双击、自动复制和自动关闭手势，因此只能近似网页体验。完整手势请使用网页端。
-
-## 仓库结构
+如果你已经有自己的聊天前端或“小家”，日常要用的只有 **两个规则文件和两个组件**：
 
 ```text
-src/thought_bridge/
-  watcher.py        # 实时跟随 Claude Code transcript
-  transcript.py     # JSONL 增量读取与事件抽取
-  action_labels.py  # 工具调用转为安全的人话摘要
-  sinks.py          # Relay / Telegram 输出
-  mcp_server.py     # Claude Code 的 reply MCP 工具
-  server.py         # FastAPI + SQLite + SSE + Web Push
-  web/              # 可直接部署的手机网页
-templates/
-  看清自己.md        # 通用 output style + 程序封装协议
-examples/
-  claude-settings.json
-deploy/
-docs/
-tests/
+templates/看清自己.md
+  └─ 放进 Claude Code 的 output-styles
+     只管：心里话怎么写
+
+templates/CLAUDE_心里话相关规则.md
+  └─ 复制进 CLAUDE.md
+     只管：什么时候写、标签怎么包、怎样发送
+
+watcher
+  └─ 自动读取 Claude Code transcript 里已经出现的 thinking 和工具动作
+
+reply MCP
+  └─ 把心里话和正式回复送给前端；一次调用就是一个气泡
 ```
 
-## 五分钟本地试跑
+安装和注册只做一次。之后 watcher 在后台自动工作，Claude 按 `CLAUDE.md` 自动调用 reply 工具，不需要每轮手动操作。
+
+> 这里同步的是 Claude Code 已经写进本机 transcript 的 `thinking` 片段和行动轨迹，不是模型后台隐藏的思考。
+
+## 一次安装
+
+### 1. 安装“看清自己”
+
+把 [`templates/看清自己.md`](templates/看清自己.md) 复制到：
+
+```text
+C:\Users\你的用户名\.claude\output-styles\看清自己.md
+```
+
+然后在 `C:\Users\你的用户名\.claude\settings.json` 中启用：
+
+```json
+{
+  "outputStyle": "看清自己"
+}
+```
+
+这个文件只决定心里话的写法，不放工具调用和前端协议。
+
+### 2. 安装心里话发送规则
+
+把 [`templates/CLAUDE_心里话相关规则.md`](templates/CLAUDE_心里话相关规则.md) 中的规则复制进你的全局或项目 `CLAUDE.md`。
+
+它负责：
+
+- 日常相处时生成一次公开心声；
+- 用 `[[自我状态]]...[[/自我状态]]` 与正文分开；
+- 第一条气泡带心里话，后续气泡不重复；
+- 通过 `mcp__thought-bridge__reply` 发送正式回复。
+
+称呼和适用场景可以按你们自己的关系修改；不要再把同一套内容规则重复写进 `CLAUDE.md`。
+
+### 3. 安装两个组件
 
 Windows PowerShell：
 
@@ -94,38 +96,60 @@ notepad .env
 .\.venv\Scripts\thought-bridge.exe doctor
 ```
 
-开两个终端：
+先在前台启动 watcher：
 
 ```powershell
-.\.venv\Scripts\thought-bridge-relay.exe
 .\.venv\Scripts\thought-bridge-watcher.exe
 ```
 
-浏览器打开 `http://127.0.0.1:8787`，输入 `.env` 中的 `RELAY_USER_TOKEN`。
+确认正常后，可以用仓库脚本把它注册成登录后自动运行的任务：
 
-给 Claude Code 注册正式回复工具：
+```powershell
+powershell -ExecutionPolicy Bypass -File .\deploy\install-windows.ps1 -InstallWatcherTask
+```
+
+再注册 reply MCP：
 
 ```powershell
 claude mcp add thought-bridge -- D:\claude\thinking_pipeline\.venv\Scripts\python.exe -m thought_bridge.mcp_server
 ```
 
-之后模型每调用一次 `mcp__thought-bridge__reply`，手机端就得到一个独立正式气泡。
+重开 Claude Code。能看到 `mcp__thought-bridge__reply`，watcher 也在运行，就装好了。
 
-## 安装路线
+## 你已经有自己的前端
 
-- [架构与消息协议](docs/architecture.md)
-- [Windows + VPS 网页版安装](docs/web.md)
-- [Telegram 版安装](docs/telegram.md)
-- [安全与隐私](docs/security.md)
-- [排错手册](docs/troubleshooting.md)
+让前端接收三种事件即可：
 
-自建前端如果会自动接收正式回复、并不使用本项目的 `reply` MCP，请先阅读[网页版安装说明中的两种发送路线](docs/web.md#3-安装看清自己风格)。不要把完整 `reply` 封装重复拼入自己的 system prompt，也不要要求模型主动输出“原生思考链”；过程事件应由 watcher 从 transcript 外部读取。
+- `thinking`：终端里已经出现的过程片段；
+- `action`：读文件、改文件、检索、执行命令等动作摘要；
+- `reply`：包含心里话标签和正式正文的成品消息。
 
-`deploy/install-windows.ps1` 和 `deploy/install-linux.sh` 是辅助脚本。先通读并填写 `.env`；不要把真实令牌提交到 Git。
+前端从 `reply` 中摘出 `[[自我状态]]...[[/自我状态]]`，显示成折叠的“心里话”；系统通知只取标签外的正式正文。
+
+不要再让前端自动抓一遍正式回复，也不要在 output style 里重复放 reply 协议，否则容易出现重复气泡或两套规则互相打架。
+
+事件格式与通知规则见 [架构与消息协议](docs/architecture.md)。
+
+## 没有自己的前端（可选扩展）
+
+下面这些不是心里话功能本身的必需步骤，只在你没有现成接收端时使用：
+
+- [完整 Windows + VPS 网页版](docs/web.md)：仓库自带 FastAPI、SQLite、SSE、Web Push 和手机网页；
+- [Telegram 版](docs/telegram.md)：不用自己写网页，改成发送到 Bot；
+- [安全与隐私](docs/security.md)；
+- [排错手册](docs/troubleshooting.md)。
+
+## 最终表现
+
+- 心里话折叠显示，正式回复正常显示；
+- thinking 和动作轨迹静默同步，不进入系统通知；
+- 通知只显示正式回复；
+- 每次 reply 调用保持为一个独立气泡；
+- 多个气泡使用独立通知 ID，不互相覆盖。
 
 ## 边界
 
-- transcript 结构属于 Claude Code 的实现细节，版本升级后可能变化；测试覆盖了常见的 `assistant.content[].thinking/tool_use/text` 结构。
-- 不自动读取或发布安装者现有的 output style；仓库只提供这份通用模板。
-- 默认对常见密钥格式做遮盖，但这不是数据防泄漏的绝对保证。公开服务器前必须使用 HTTPS、长随机令牌和防火墙。
-- 正式回复默认要求模型显式调用 `reply` 工具，避免 transcript 自动抓取造成重复气泡。
+- transcript 结构属于 Claude Code 的实现细节，版本升级后可能变化；
+- 仓库不会自动读取或上传你的现用 output style、聊天记录、域名、头像或令牌；
+- 默认密钥遮盖不是绝对的数据防泄漏保证，部署到公网前仍需 HTTPS、长随机令牌和防火墙；
+- 正式回复由 reply MCP 明确发送，避免 watcher 自动抓正文造成误拆或重复。
