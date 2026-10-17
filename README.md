@@ -119,6 +119,8 @@ claude mcp add thought-bridge -- D:\claude\thinking_pipeline\.venv\Scripts\pytho
 - [安全与隐私](docs/security.md)
 - [排错手册](docs/troubleshooting.md)
 
+自建前端如果会自动接收正式回复、并不使用本项目的 `reply` MCP，请先阅读[网页版安装说明中的两种发送路线](docs/web.md#3-安装看清自己风格)。不要把完整 `reply` 封装重复拼入自己的 system prompt，也不要要求模型主动输出“原生思考链”；过程事件应由 watcher 从 transcript 外部读取。
+
 `deploy/install-windows.ps1` 和 `deploy/install-linux.sh` 是辅助脚本。先通读并填写 `.env`；不要把真实令牌提交到 Git。
 
 ## 边界
