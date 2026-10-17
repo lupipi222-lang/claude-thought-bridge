@@ -1,6 +1,6 @@
-# Telegram 版教程
+# Telegram 版教程（可选扩展）
 
-Telegram 版适合不想维护网页前端的人。它复用同一个 watcher 和 MCP `reply` 工具，只把输出目的地改成 Bot API。
+Telegram 版不是核心安装的必需步骤。它适合没有自制前端、也不想维护网页服务的人；它复用同一个 watcher 和 MCP `reply` 工具，只把输出目的地改成 Bot API。
 
 ## 能做到什么
 
